@@ -8,13 +8,44 @@ import styled from "styled-components";
 interface Country {
   name: string;
   alpha2Code: string;
+  flag: {
+    emoji: string;
+  };
+  area: number;
+  population: number;
+  populationDensity: number;
+  capital: string;
 }
 
 const GET_COUNTRY_BY_NAME = gql`
   query GetCountryByName($name: String!) {
     Country(filter: { name_contains: $name }) {
       name
+      nativeName
       alpha2Code
+      area
+      population
+      populationDensity
+      capital
+      subregion {
+        name
+        region {
+          name
+        }
+      }
+      officialLanguages {
+        iso639_1
+        iso639_2
+        name
+        nativeName
+      }
+      currencies {
+        name
+        symbol
+      }
+      flag {
+        emoji
+      }
     }
   }
 `;
@@ -29,12 +60,10 @@ export const Countries: React.FC = () => {
   const [getCountry, { loading, data }] = useLazyQuery(GET_COUNTRY_BY_NAME);
 
   const onSearchHandle = (input: string) => {
-    console.log("Input", input);
-    getCountry({variables: { name:  input }});
+    getCountry({ variables: { name: input } });
   };
 
   useEffect(() => {
-    console.log("data", data);
     if (data) setCountrySearched(data);
   }, [data]);
 
@@ -45,7 +74,10 @@ export const Countries: React.FC = () => {
         setSelectedCountry={setSelectedCountry}
         countrySearched={countrySearched}
       />
-      {selectedCountry && <CountryDetails selectedCountry={selectedCountry} />}
+      <CountryDetails
+        setSelectedCountry={setSelectedCountry}
+        selectedCountry={selectedCountry}
+      />
     </Container>
   );
 };

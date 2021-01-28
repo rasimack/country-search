@@ -1,27 +1,14 @@
 import React, { useEffect } from "react";
 import { gql, useQuery } from "@apollo/client";
+import styled from "styled-components";
 
 const ALL_COUNTRIES = gql`
   query {
     Country {
       name
-      nativeName
       alpha2Code
-      alpha3Code
-      area
-      population
-      populationDensity
-      capital
-      demonym
-      gini
-      location {
-        latitude
-        longitude
-      }
       flag {
         emoji
-        emojiUnicode
-        svgFile
       }
     }
   }
@@ -30,6 +17,9 @@ const ALL_COUNTRIES = gql`
 interface Country {
   name: string;
   alpha2Code: string;
+  flag: {
+    emoji: string;
+  };
 }
 
 interface CountryQuery {
@@ -45,21 +35,34 @@ export const CountriesList: React.FC<CountryData> = ({
   setSelectedCountry,
   countrySearched,
 }) => {
-  const { loading, error, data } = useQuery<CountryQuery[]>(ALL_COUNTRIES);
+  const { loading, error, data } = useQuery<CountryQuery>(ALL_COUNTRIES);
 
-  if (loading) return <p>Cargando ...</p>;
-
-  const onClickHandler = (country: any) => {
-    setSelectedCountry(country);
-  };
+  if (loading) return <StyledLoading>Cargando ...</StyledLoading>;
 
   const renderList = (countries: any) =>
     countries &&
     countries.Country.map((country: any) => (
-      <div key={country.alpha2Code} onClick={() => onClickHandler(country)}>
-        {country.name}
-      </div>
+      <StyledItem
+        key={country.alpha2Code}
+        onClick={() => setSelectedCountry(country)}
+      >
+        {`${country.flag.emoji}  ${country.name}`}
+      </StyledItem>
     ));
 
-  return <div>{renderList(countrySearched || data)}</div>;
+  return <ul>{renderList(countrySearched || data)}</ul>;
 };
+
+const StyledItem = styled.li`
+  margin: 7px 0;
+  color: #ffffff;
+  font-weight: bold;
+
+  :hover {
+    cursor: pointer;
+  }
+`;
+
+const StyledLoading = styled.p`
+  color: white;
+`;

@@ -8,13 +8,13 @@ interface Props {
 }
 
 interface Currency {
-  _id: string;
+  code: string;
   name: string;
 }
 
 interface Language {
-  _id: string;
   name: string;
+  iso639_1: string;
 }
 
 interface Region {
@@ -30,11 +30,11 @@ const GET_COUNTRY_FILTERS = gql`
     }
     Language {
       name
-      _id
+      iso639_1
     }
     Currency {
       name
-      _id
+      code
     }
   }
 `;
@@ -56,21 +56,24 @@ export const Search: React.FC<Props> = ({ onSearchHandle, searchLoading }) => {
   }, [data]);
 
   const onChangeHandle = (event: any) => {
-    console.log(event.target.value);
-    setInput(event.target.value);
+    const inputCapitalized = capitalize(event.target.value);
+    setInput(inputCapitalized);
   };
 
-  console.log("data", data);
+  const capitalize = (input: string) =>
+    input.charAt(0).toUpperCase() + input.slice(1);
 
   return (
     <Container>
       <div className="search">
         <input
           type="text"
-          placeholder="Ingrese pais a buscar"
+          className="input"
+          placeholder="Ingrese nombre o codigo de pais"
           onChange={onChangeHandle}
         />
         <button
+          className="button"
           disabled={loading || searchLoading}
           onClick={() => onSearchHandle(input)}
         >
@@ -78,27 +81,39 @@ export const Search: React.FC<Props> = ({ onSearchHandle, searchLoading }) => {
         </button>
       </div>
       <div className="filters">
-        <label>Idiomas</label>
-        <select name="language" id="cars">
-          {languages &&
-            languages.map((language) => (
-              <option value={language._id}>{language.name}</option>
-            ))}
-        </select>
-        <label>Moneda</label>
-        <select name="language" id="cars">
-          {currencies &&
-            currencies.map((currency) => (
-              <option value={currency._id}>{currency.name}</option>
-            ))}
-        </select>
-        <label>Region</label>
-        <select name="language" id="cars">
-          {regions &&
-            regions.map((region) => (
-              <option value={region._id}>{region.name}</option>
-            ))}
-        </select>
+        <div className={"filter-item"}>
+          <label>Idioma:</label>
+          <select name="language" id="cars">
+            {languages &&
+              languages.map((language, index) => (
+                <option key={index} value={language.iso639_1}>
+                  {language.name}
+                </option>
+              ))}
+          </select>
+        </div>
+        <div className={"filter-item"}>
+          <label>Moneda:</label>
+          <select name="language" id="cars">
+            {currencies &&
+              currencies.map((currency, index) => (
+                <option key={index} value={currency.code}>
+                  {currency.name}
+                </option>
+              ))}
+          </select>
+        </div>
+        <div className={"filter-item"}>
+          <label>Region:</label>
+          <select name="language" id="cars">
+            {regions &&
+              regions.map((region, index) => (
+                <option key={index} value={region._id}>
+                  {region.name}
+                </option>
+              ))}
+          </select>
+        </div>
       </div>
     </Container>
   );
@@ -106,14 +121,37 @@ export const Search: React.FC<Props> = ({ onSearchHandle, searchLoading }) => {
 
 const Container = styled.div`
   display: grid;
-  grid-template-rows: auto auto;
+  grid-template-rows: 50px 50px;
   row-gap: 1rem;
+  justify-content: center;
 
   .search {
     display: flex;
+    justify-content: center;
+
+    .input {
+      margin-right: 0.5rem;
+      width: 300px;
+    }
+
+    .button {
+      width: 100px;
+    }
   }
 
   .filters {
     display: flex;
+    align-items: center;
+
+    .filter-item {
+      display: flex;
+      flex-direction: column;
+      margin: 0.5rem;
+
+      label {
+        padding: 0 0 0.5rem 0;
+        color: white;
+      }
+    }
   }
 `;
